@@ -79,6 +79,37 @@ class ResourceDialog extends StatelessWidget {
     );
   }
 
+  Widget buildForm(DialogController controller) {
+    var form = resource.formBuilder();
+    return Column(
+      children: [
+        for (var row in form)
+          Row(
+            children: [for (var field in row) getFormField(field)],
+          )
+      ],
+    );
+  }
+
+  Widget getFormField(Field field) {
+    switch (field.fieldType) {
+      case FormFieldType.image:
+        return Container();
+      case FormFieldType.name:
+        return Container();
+      case FormFieldType.dropdown:
+        return Container();
+      case FormFieldType.date:
+        return Container();
+      case FormFieldType.time:
+        return Container();
+      case FormFieldType.phoneNumber:
+        return Container();
+      case FormFieldType.email:
+        return Container();
+    }
+  }
+
   Widget getField(
       FieldType type, List<Field> fields, DialogController controller) {
     switch (type) {
@@ -136,7 +167,6 @@ class ResourceDialog extends StatelessWidget {
             for (var field in fields) field.builder!(controller),
           ],
         );
-
     }
   }
 
@@ -211,7 +241,6 @@ class ResourceDialog extends StatelessWidget {
           return FutureBuilder<List<Resource>>(
             future: field.repository!.fetch(queries: field.queries ?? {}),
             builder: (context, snapshot) {
-              print(snapshot.data);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

@@ -13,18 +13,22 @@ class ResourceTableView<T extends Resource> extends StatelessWidget {
     this.onError,
     this.canAdd = true,
     this.onTap,
+    this.onEdit,
+    this.onAdd,
   }) : super(key: key);
   final Repository<T> repository;
   final String title;
   final bool canAdd;
   final Function(Exception)? onError;
   final Function(Resource)? onTap;
+  final Future<T> Function()? onAdd;
+  final Future<T> Function(T value)? onEdit;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<TableController<T>>(
       id: repository.hashCode,
-      init: TableController(repository),
+      init: TableController(repository, onAdd: onAdd, onEdit: onEdit),
       builder: (controller) {
         return controller.obx(
           (state) {
@@ -330,9 +334,11 @@ class ResourceTableView<T extends Resource> extends StatelessWidget {
 class TableController<T extends Resource> extends GetxController
     with StateMixin<List<T>> {
   final Repository<T> repository;
+  final Future<T> Function()? onAdd;
+  final Future<T?> Function(T value)? onEdit;
   final Function(Exception)? onError;
 
-  TableController(this.repository, {this.onError});
+  TableController(this.repository, {this.onError, this.onAdd, this.onEdit});
 
   late int limit;
   late int offset;
@@ -361,9 +367,15 @@ class TableController<T extends Resource> extends GetxController
   }
 
   void insertRow({Map<String, dynamic>? initialData}) async {
-    var resource = repository.empty.fromMap(repository.empty.toMap()..addAll(initialData??{}));
+    var resource = repository.empty
+        .fromMap(repository.empty.toMap()..addAll(initialData ?? {}));
     try {
-      T? value = await Get.dialog(ResourceDialog(resource: resource));
+      T? value;
+      if (onAdd != null) {
+        value = await onAdd!();
+      } else {
+        value = await Get.dialog(ResourceDialog(resource: resource));
+      }
       if (value == null) return;
       isRefreshing.value = true;
       await repository.insert(value);
@@ -385,7 +397,12 @@ class TableController<T extends Resource> extends GetxController
   }
 
   void updateRow(T value) async {
-    T? updatedValue = await Get.dialog(ResourceDialog(resource: value));
+    T? updatedValue;
+    if (onEdit != null) {
+      updatedValue = await onEdit!(value);
+    } else {
+      updatedValue = await Get.dialog(ResourceDialog(resource: value));
+    }
     if (updatedValue == null) return;
     isRefreshing.value = true;
     await repository.update(updatedValue);

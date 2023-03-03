@@ -16,9 +16,7 @@ abstract class Resource<T> {
 
   Map<String, dynamic> toMap();
 
-
   T fromMap(Map<String, dynamic> map);
-
 
   ResourceRow getResourceRow(TableController controller) {
     throw UnimplementedError();
@@ -29,6 +27,10 @@ abstract class Resource<T> {
   }
 
   List<Field> getFields();
+
+  List<List<Field>> formBuilder() {
+    throw UnimplementedError();
+  }
 
   Future<String> fileUploader(Uint8List data) {
     throw UnimplementedError();
@@ -42,6 +44,7 @@ abstract class Resource<T> {
 class Field {
   final String name;
   final FieldType type;
+  final FormFieldType fieldType;
   final String? label;
   final String? hint;
   final bool isRequired;
@@ -49,12 +52,13 @@ class Field {
   final Field? subField;
   final Repository<Resource>? repository;
   final Widget Function(DialogController)? builder;
-  final Map<String,dynamic>? queries;
+  final Map<String, dynamic>? queries;
 
   Field(
     this.name,
     this.type, {
     this.label,
+    this.fieldType = FormFieldType.name,
     this.hint,
     this.subField,
     this.isRequired = false,
@@ -78,17 +82,27 @@ class Field {
   }
 }
 
-enum FieldType {
+enum FormFieldType {
   image,
+  name,
+  dropdown,
   date,
   time,
-  name,
-  text,
-  email,
-  duration,
-  dropdown,
-  foreign,
   phoneNumber,
+  email,
+}
+
+enum FieldType {
+  image, //
+  date, //
+  time, //
+  name, //
+  text,
+  email, //
+  duration,
+  dropdown, //
+  foreign,
+  phoneNumber, //
   number,
   password,
   recurring,

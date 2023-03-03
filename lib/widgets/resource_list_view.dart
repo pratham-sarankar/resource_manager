@@ -22,6 +22,7 @@ class ResourceListView<T extends Resource> extends StatelessWidget {
   final Widget Function(ListController, T) tileBuilder;
   final String description;
   final bool canAdd;
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
@@ -33,30 +34,36 @@ class ResourceListView<T extends Resource> extends StatelessWidget {
           children: [
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        height: 1,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          height: 1,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      description,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                        letterSpacing: 0.1,
+                      const SizedBox(height: 5),
+                      Text(
+                        description,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 13,
+                          height: 1,
+                          color: Colors.grey.shade700,
+                          letterSpacing: 0.1,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const Spacer(),
                 Obx(
                   () => TextButton(
                     child: Row(

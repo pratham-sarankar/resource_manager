@@ -101,6 +101,7 @@ abstract class Provider<T> extends GetConnect {
 
   void _verifyStatus(Response response, List<int> allowedStatuses) {
     print(response.body);
+    print(response.request?.url?.toString());
     if (!allowedStatuses.contains(response.statusCode)) {
       throw ApiException(
         status: response.statusCode ?? HttpStatus.internalServerError,
