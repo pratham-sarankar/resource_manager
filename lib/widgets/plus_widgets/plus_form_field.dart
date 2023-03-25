@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:get/get.dart';
@@ -36,10 +37,12 @@ class PlusFormField extends StatefulWidget {
 
 class _PlusFormFieldState extends State<PlusFormField> {
   late final TextEditingController _controller;
+  late bool _isObscure;
 
   @override
   void initState() {
     super.initState();
+    _isObscure = widget.type == FieldType.password;
     _controller = widget.controller ??
         TextEditingController(text: "${widget.initialText ?? ""}");
   }
@@ -83,7 +86,7 @@ class _PlusFormFieldState extends State<PlusFormField> {
         TextFormField(
           controller: _controller,
           keyboardType: widget.type.textInputType,
-          obscureText: widget.type == FieldType.password,
+          obscureText: _isObscure,
           style: TextStyle(
             fontSize: 14,
             color: context.theme.colorScheme.onBackground,
@@ -94,7 +97,24 @@ class _PlusFormFieldState extends State<PlusFormField> {
           decoration: InputDecoration(
             isDense: true,
             isCollapsed: true,
-            contentPadding: const EdgeInsets.all(10),
+            suffixIcon: widget.type == FieldType.password
+                ? IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
+                    icon: Icon(_isObscure
+                        ? CupertinoIcons.eye_solid
+                        : CupertinoIcons.eye_slash_fill),
+                  )
+                : null,
+            contentPadding: EdgeInsets.only(
+              right: 10,
+              left: 10,
+              top: widget.type == FieldType.password ? 15 : 10,
+              bottom: 10,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),

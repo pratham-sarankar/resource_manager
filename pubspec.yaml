@@ -13,7 +13,7 @@ dependencies:
   get:
   google_fonts:
   intl:
-  dropdown_button2:
+  dropdown_button2: ^2.0.0
   file_picker:
   collection:
   form_validator:

@@ -81,36 +81,6 @@ class PlusDropDownState<T> extends State<PlusDropDown> {
                 if (widget.onChanged == null) return;
                 widget.onChanged!(selectedValue);
               },
-              icon: Icon(Icons.arrow_drop_down_rounded,
-                  size: 25, color: value == null ? Colors.grey : Colors.black),
-              iconSize: 14,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                isDense: true,
-              ),
-              buttonHeight: 35,
-              buttonPadding: const EdgeInsets.only(left: 5, right: 14),
-              buttonDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: context.theme.outlinedButtonTheme.style!.side!
-                      .resolve({})!.color,
-                ),
-              ),
-              buttonElevation: 0,
-              itemHeight: 40,
-              itemPadding: const EdgeInsets.only(left: 10, right: 10),
-              dropdownMaxHeight: 200,
-              dropdownPadding: null,
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              dropdownElevation: 8,
-              scrollbarRadius: const Radius.circular(40),
-              scrollbarThickness: 6,
-              scrollbarAlwaysShow: true,
-              offset: const Offset(0, 0),
               validator: ValidationBuilder(optional: !widget.isRequired)
                   .add(widget.onValidate ?? (value) => null)
                   .buildDyn(),

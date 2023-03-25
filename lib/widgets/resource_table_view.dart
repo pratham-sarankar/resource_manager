@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,44 +43,60 @@ class ResourceTableView<T extends Resource> extends StatelessWidget {
                 children: [
                   getHeader(controller),
                   Expanded(
-                    child: ListView(
-                      children: [
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                            showCheckboxColumn: false,
-                            showBottomBorder: true,
-                            onSelectAll: (value) {},
-                            columns: [
-                              DataColumn(
-                                label: Text(
-                                  "S. no.",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              for (String data in controller.column.columns)
-                                DataColumn(
-                                  label: Text(
-                                    data,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(Get.context!).copyWith(
+                        dragDevices: {
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.mouse,
+                        }
+                      ),
+                      child: ListView(
+                        controller: controller.verticalScrollController,
+                        children: [
+                          Scrollbar(
+                            controller:controller.horizontalScrollController,
+                            scrollbarOrientation: ScrollbarOrientation.bottom,
+                            thumbVisibility:true,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              controller: controller.horizontalScrollController,
+                              dragStartBehavior: DragStartBehavior.down,
+                              child: DataTable(
+                                showCheckboxColumn: false,
+                                showBottomBorder: true,
+                                onSelectAll: (value) {},
+                                columns: [
+                                  DataColumn(
+                                    label: Text(
+                                      "S. no.",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                            rows: [
-                              for (int i = 0; i < controller.rows.length; i++)
-                                getDataRow(controller, controller.rows[i], i),
-                            ],
+                                  for (String data in controller.column.columns)
+                                    DataColumn(
+                                      label: Text(
+                                        data,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                                rows: [
+                                  for (int i = 0; i < controller.rows.length; i++)
+                                    getDataRow(controller, controller.rows[i], i),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   getFooter(controller),
@@ -237,19 +254,21 @@ class ResourceTableView<T extends Resource> extends StatelessWidget {
 
   Widget getFooter(TableController controller) {
     return Padding(
-      padding: const EdgeInsets.only(right: 20, left: 20, top: 5, bottom: 5),
+      padding: const EdgeInsets.only(right: 20, left: 20, top: 20, bottom: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.arrow_back_ios, size: 14),
-          ),
-          const SizedBox(width: 20),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.arrow_forward_ios, size: 14),
-          ),
+          if(controller.status.isLoadingMore) const Text("Loading More ..."),
+          const Spacer(),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.arrow_back_ios, size: 14),
+          // ),
+          // const SizedBox(width: 20),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: const Icon(Icons.arrow_forward_ios, size: 14),
+          // ),
         ],
       ),
     );
@@ -334,6 +353,8 @@ class ResourceTableView<T extends Resource> extends StatelessWidget {
 class TableController<T extends Resource> extends GetxController
     with StateMixin<List<T>> {
   final Repository<T> repository;
+  late final ScrollController verticalScrollController;
+  late final ScrollController horizontalScrollController;
   final Future<T> Function()? onAdd;
   final Future<T?> Function(T value)? onEdit;
   final Function(Exception)? onError;
@@ -347,11 +368,30 @@ class TableController<T extends Resource> extends GetxController
   @override
   void onInit() {
     super.onInit();
-    limit = 50;
+    limit = 15;
     offset = 0;
     isRefreshing = false.obs;
     change([], status: RxStatus.loading());
+    horizontalScrollController = ScrollController();
+    verticalScrollController = ScrollController();
+    verticalScrollController.addListener(loadMoreListener);
     init();
+  }
+
+  loadMoreListener(){
+    if(verticalScrollController.position.pixels == verticalScrollController.position.maxScrollExtent){
+      loadMore();
+    }
+  }
+
+  Future loadMore()async{
+    offset += limit;
+    change(value,status: RxStatus.loadingMore());
+    var result = await repository.fetch(limit: limit, offset: offset);
+    if(result.isEmpty){
+      verticalScrollController.removeListener(loadMoreListener);
+    }
+    change([...(value??[]),...result],status: RxStatus.success());
   }
 
   List<ResourceRow> get rows =>
@@ -411,10 +451,18 @@ class TableController<T extends Resource> extends GetxController
   }
 
   Future reload() async {
+    offset = 0;
+    verticalScrollController.addListener(loadMoreListener);
     isRefreshing.value = true;
     List<T> values = await repository.fetch(limit: limit, offset: offset);
     isRefreshing.value = false;
     change(values,
         status: values.isEmpty ? RxStatus.empty() : RxStatus.success());
+  }
+
+  @override
+  void onClose() {
+    horizontalScrollController.dispose();
+    super.onClose();
   }
 }

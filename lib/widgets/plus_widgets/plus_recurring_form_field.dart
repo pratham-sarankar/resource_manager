@@ -152,30 +152,29 @@ class _RecurringFormFieldState extends State<_RecurringFormField> {
                   ),
                 ],
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                  return CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      weekdays[index],
-                      style: const TextStyle(
-                        fontSize: 16,
+              Column(
+                children: [
+                  for (int i = 0; i < weekdays.length; i++)
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        weekdays[i],
+                        style: const TextStyle(
+                          fontSize: 16,
+                        ),
                       ),
+                      value: byWeekDays.contains(ByWeekDayEntry(i + 1)),
+                      onChanged: (value) {
+                        if (value ?? false) {
+                          byWeekDays.add(ByWeekDayEntry(i + 1));
+                        } else {
+                          byWeekDays.remove(ByWeekDayEntry(i + 1));
+                        }
+                        changeState(frequency, byWeekDays);
+                      },
                     ),
-                    value: byWeekDays.contains(ByWeekDayEntry(index + 1)),
-                    onChanged: (value) {
-                      if (value ?? false) {
-                        byWeekDays.add(ByWeekDayEntry(index + 1));
-                      } else {
-                        byWeekDays.remove(ByWeekDayEntry(index + 1));
-                      }
-                      changeState(frequency, byWeekDays);
-                    },
-                  );
-                },
-              ),
+                ],
+              )
             ],
           ),
         if (widget.state.hasError)

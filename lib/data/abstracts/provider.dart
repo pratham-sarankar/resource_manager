@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:resource_manager/data/exceptions/api_exception.dart';
+import 'package:resource_manager/data/responses/fetch_response.dart';
 
 abstract class Provider<T> extends GetConnect {
   final String path;
@@ -26,7 +27,16 @@ abstract class Provider<T> extends GetConnect {
 
   Future<Request> authenticator(Request request);
   Future insert(T value);
-  Future<List<T>> fetch({int limit = 100, int offset = 0});
+  Future<List<T>> fetch({
+    int limit = 100,
+    int offset = 0,
+    Map<String, dynamic> queries = const {},
+  });
+  Future<FetchResponse> fetchWithCount({
+    int limit = 100,
+    int offset = 0,
+    Map<String, dynamic> queries = const {},
+  });
   Future<T> fetchOne(int id);
   Future update(T value);
   Future destroy(T value);
@@ -100,8 +110,6 @@ abstract class Provider<T> extends GetConnect {
   }
 
   void _verifyStatus(Response response, List<int> allowedStatuses) {
-    print(response.body);
-    print(response.request?.url?.toString());
     if (!allowedStatuses.contains(response.statusCode)) {
       throw ApiException(
         status: response.statusCode ?? HttpStatus.internalServerError,
