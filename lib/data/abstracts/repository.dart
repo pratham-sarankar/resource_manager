@@ -68,7 +68,8 @@ abstract class Repository<T extends Resource> extends Provider<T> {
 
   @override
   Future destroyMany(List<int> ids) async {
-    await delete('/', query: {'ids': ids});
+    List<String> idsString = ids.map((id) => id.toString()).toList();
+    await delete('/', query: {'ids': idsString});
   }
 
   T get empty;
