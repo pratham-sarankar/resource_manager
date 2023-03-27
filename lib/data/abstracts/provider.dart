@@ -40,7 +40,7 @@ abstract class Provider<T> extends GetConnect {
   Future<T> fetchOne(int id);
   Future update(T value);
   Future destroy(T value);
-  Future destroyMany(List<T> value);
+  Future destroyMany(List<int> ids);
 
   @override
   Future<Response<T>> get<T>(String url,
